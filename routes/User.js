@@ -31,19 +31,28 @@ router.get('/', async (req, res) => {
 
 router.post('/',async (req,res)=>{
 
- let authuser = req.body ; 
- let hashedpassword = await bcrypt.hash(req.body.password, 10);
- authuser = {...authuser,password:hashedpassword}
-const newuser= new User (authuser);
-try { 
-const user = await newuser.save();
-res.status(200).json(user);
-} 
-catch(err){
-res.status(400).json(err);
-}
+     User.findOne({email:req.body.email})
+     .then(async (user) => {
+           if(user){
+                return res.status(400).json({email:'Email already exists'});
+           }else{
+               let authuser = req.body ; 
+               let hashedpassword = await bcrypt.hash(req.body.password, 10);
+               authuser = {...authuser,password:hashedpassword}
+              const newuser= new User (authuser);
+              try { 
+              const user = await newuser.save();
+              res.status(200).send({message: "User created successfully"});
+              } 
+              catch(err){
+              res.status(400).send(err);
+              }
+          }
+     })
 
 }); 
+
+
 
 router.delete('/:id', async (req,res)=>{
     try {
